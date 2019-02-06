@@ -37,18 +37,8 @@ describe('The example lu files', function() {
         }
     });
 
-    it('refresh command successfully reconstructs a markdown file from a QnA input file with qnaDocuments section', function(done) {
+   it('refresh command successfully reconstructs a markdown file from a QnA input file with qnaDocuments section', function(done) {
         exec(`node ${ludown} refresh -q ${TEST_ROOT}/testcases/qnaDocuments.json -o ${TEST_ROOT}/output -n qnaDocuments`, () => {
-            try {
-                done();
-            } catch(err) {
-                done(err);
-            }
-        });
-    });
-
-    it('refresh command successfully reconstructs a markdown file from a LUIS input file with out of order entity references', function(done) {
-        exec(`node ${ludown} refresh -i ${TEST_ROOT}/testcases/test269-d.json -o ${TEST_ROOT}/output -n test269-d2`, () => {
             try {
                 done();
             } catch(err) {
@@ -71,7 +61,7 @@ describe('The example lu files', function() {
     it('refresh command successfully reconstructs a markdown file from a LUIS input file', function(done) {
         exec(`node ${ludown} refresh -i ${TEST_ROOT}/verified/all.json -o ${TEST_ROOT}/output --skip_header -n allGen`, () => {
             try {
-                compareFiles(TEST_ROOT + '/output/allGen.lu', TEST_ROOT + '/verified/allRefresh.lu');
+                compareFiles(TEST_ROOT + '/output/allGen.lu', TEST_ROOT + '/verified/allGen.lu');
                 done();
             } catch(err) {
                 done(err);
@@ -427,6 +417,38 @@ describe('The example lu files', function() {
         });
     });
 
+    it('Deep references in lu files - *utterances* wild card is handled corectly', function (done) {
+        exec(`node ${ludown} parse toluis --in ${TEST_ROOT}/testcases/ref6.lu --out ref6.json -o ${TEST_ROOT}/output`, () => {
+            try {
+                assert.deepEqual(JSON.parse(txtfile.readSync(TEST_ROOT + '/output/ref6.json')), JSON.parse(txtfile.readSync(TEST_ROOT + '/verified/ref6.json')));
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+    });
+
+    it('Deep references in lu files - *utterances* wild card is handled corectly', function (done) {
+        exec(`node ${ludown} parse toluis --in ${TEST_ROOT}/testcases/ref7.lu --out ref7.json -o ${TEST_ROOT}/output`, () => {
+            try {
+                assert.deepEqual(JSON.parse(txtfile.readSync(TEST_ROOT + '/output/ref7.json')), JSON.parse(txtfile.readSync(TEST_ROOT + '/verified/ref7.json')));
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+    });
+
+    it('Deep references in lu files - *utterances* wild card is handled corectly', function (done) {
+        exec(`node ${ludown} parse toluis --in ${TEST_ROOT}/testcases/ref8.lu --out ref8.json -o ${TEST_ROOT}/output`, () => {
+            try {
+                assert.deepEqual(JSON.parse(txtfile.readSync(TEST_ROOT + '/output/ref8.json')), JSON.parse(txtfile.readSync(TEST_ROOT + '/verified/ref8.json')));
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+    });
 
     it('Nested entity references in LUIS JSON models are skipped correctly', function (done) {
         exec(`node ${ludown} refresh -i ${TEST_ROOT}/testcases/nested-luis-json.json -o ${TEST_ROOT}/output`, (error, stdout, stderr) => {
@@ -438,4 +460,16 @@ describe('The example lu files', function() {
             }
         });
     });
+
+    it('Regex entity references in a model file can be refreshed correctly using ludown refresh', function (done) {
+        exec(`node ${ludown} refresh -i ${TEST_ROOT}/testcases/regexmodel.luis -s -n regexmodel.lu -o ${TEST_ROOT}/output`, (error, stdout, stderr) => {
+            try {
+                assert.deepEqual(txtfile.readSync(TEST_ROOT + '/output/regexmodel.lu'), txtfile.readSync(TEST_ROOT + '/verified/regexmodel.lu'));
+                done();
+            } catch (err) {
+                done(err);
+            }
+        });
+    });
+    
 });
